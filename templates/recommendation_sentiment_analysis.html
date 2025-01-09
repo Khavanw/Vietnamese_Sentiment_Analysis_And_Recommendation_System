@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Recommendation && Sentiment Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Vietnamese Recommendation && Sentiment Analysis</h1>
+        {% if user_id %}
+            {% if user_id == 1 %}
+                <form method="POST">
+                    <button type="submit" name="predict">Predict</button>
+                </form>
+                {% if results %}
+                    {% for user in results %}
+                        <p>Xin chào {{ user.getUserName }}!, Bình luận bạn đã nhập: </p>
+                        <p>'{{ user.getComment }}'</p>
+                        <p>Sentiment: {{ user.getPredict }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+                {% if phone %}
+                    <div class="phone-details">
+                        <img src="{{ phone.getPhotoUrl }}" alt="{{ phone.getPhoneName }}" class="phone-photo">
+                        <div class="phone-info">
+                            <h2>{{ phone.getPhoneName }}</h2>
+                            <ul>
+                                {% for spec, value in phone.getSpecifications.items() %}
+                                    <li>{{ spec }}: {{ value }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                <form method="POST" action="{{ url_for('recommendation_sentiment_analysis') }}" id="commentForm">
+                    <input type="hidden" name="product_id" value="{{ phone.getProductId if phone else '' }}">
+                    <textarea name="comment_input" placeholder="Nhập bình luận của bạn:" required 
+                              onkeydown="if(event.keyCode==13 && !event.shiftKey) { event.preventDefault(); this.form.submit(); }"></textarea><br><br>
+                    <button type="submit" name="submit">Gửi bình luận</button>
+                </form>
+            {% endif %}
+        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul class="messages">
+                {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+        {% if recommendations is not none %}
+        <div class="recommendations">
+            <h3>Sản phẩm tương tự:</h3>
+            <div class="row">
+                {% if recommendations is mapping or recommendations is sequence %}
+                    {% for phone in recommendations %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            {% if phone['photo_url'] %}
+                            <img src="{{ phone['photo_url'] }}" class="card-img-top" alt="{{ phone['phone_name'] }}" style="max-height: 200px; object-fit: contain;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ phone['phone_name'] }}</h5>
+                                <p class="card-text">Giá: {{ "{:,.0f}".format(phone['Price']/10).replace(',', '.') }} VNĐ</p>
+                                <p class="card-text">RAM: {{ phone['ram'] }}GB</p>
+                                <p class="card-text">Bộ nhớ trong: {{ phone['storage'] }}GB</p>
+                                {% if phone['rear_camera'] %}
+                                <p class="card-text">Camera sau: {{ phone['rear_camera'] }}MP</p>
+                                {% endif %}
+                                {% if phone['front_camera'] %}
+                                <p class="card-text">Camera trước: {{ phone['front_camera'] }}MP</p>
+                                {% endif %}
+                                <p class="card-text">Đánh giá: {{ "%.1f"|format(phone['User Rating']) }}/5 ({{ phone['Review Count'] }} đánh giá)</p>
+                                <p class="card-text">Độ tương đồng: {{ "%.1f"|format(phone['similarity_score'] * 100) }}%</p>
+                                <a href="{{ url_for('phone_detail', phone_id=phone['Product ID']|int) }}" class="btn btn-primary">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for _, phone in recommendations.iterrows() %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            {% if phone['photo_url'] %}
+                            <img src="{{ phone['photo_url'] }}" class="card-img-top" alt="{{ phone['phone_name'] }}" style="max-height: 200px; object-fit: contain;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ phone['phone_name'] }}</h5>
+                                <p class="card-text">Giá: {{ "{:,.0f}".format(phone['Price']/10).replace(',', '.') }} VNĐ</p>
+                                <p class="card-text">RAM: {{ phone['ram'] }}GB</p>
+                                <p class="card-text">Bộ nhớ trong: {{ phone['storage'] }}GB</p>
+                                {% if phone['rear_camera'] %}
+                                <p class="card-text">Camera sau: {{ phone['rear_camera'] }}MP</p>
+                                {% endif %}
+                                {% if phone['front_camera'] %}
+                                <p class="card-text">Camera trước: {{ phone['front_camera'] }}MP</p>
+                                {% endif %}
+                                <p class="card-text">Đánh giá: {{ "%.1f"|format(phone['User Rating']) }}/5 ({{ phone['Review Count'] }} đánh giá)</p>
+                                <p class="card-text">Độ tương đồng: {{ "%.1f"|format(phone['similarity_score'] * 100) }}%</p>
+                                <a href="{{ url_for('phone_detail', phone_id=phone['Product ID']|int) }}" class="btn btn-primary">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

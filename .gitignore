@@ -1,0 +1,6 @@
+/bao_cao/
+/PhoBert/PhoBERT_base_fairseq/
+/PhoBert/PhoBERT_base_transformers/
+/PhoBert/Weights/
+app.py
+app2.py

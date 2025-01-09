@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>Phone List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="Logo" class="logo">
+    </div>
+    
+    <div class="container">
+        {% if results %}
+            <div class="phone-list">
+                {% for phone in results %}
+                    <div class="phone-item">
+                        <a href="{{ url_for('phone_detail', phone_id=phone.getId) }}">
+                            <h2>{{ phone.getPhoneName }}</h2>
+                            <img src="{{ phone.getPhotoUrl }}" alt="{{ phone.getPhoneName }}" />
+                        </a>
+                        <ul>
+                            {% for key, value in phone.getSpecifications.items() %}
+                                <li><strong>{{ key }}:</strong> {{ value }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="pagination-buttons">
+                {% if current_page > 1 %}
+                    <a href="{{ url_for('phone', page=current_page-1) }}" class="nav-btn">Previous</a>
+                {% endif %}
+                
+                {% if current_page < total_pages %}
+                    <a href="{{ url_for('phone', page=current_page+1) }}" class="nav-btn">Next</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>No phones found.</p>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
